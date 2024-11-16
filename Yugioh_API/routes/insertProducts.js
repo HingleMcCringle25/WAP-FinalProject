@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const router = Router();
 
-// POST: Insert a single product
+//insert a single product
 router.post("/", async (req, res) => {
   const {
     name,
@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
     stockQuantity,
   } = req.body;
 
-  // Validate input
+  //validate input
   if (
     !name ||
     !description ||
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // Create the product entry
+    //create product entry
     const product = await prisma.product.create({
       data: {
         name,

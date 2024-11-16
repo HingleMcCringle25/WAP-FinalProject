@@ -7,8 +7,8 @@ const router = Router();
 //get all users in database
 router.get("/all", async (req, res) => {
   try {
-    const users = await prisma.customer.findMany(); // Fetch all users from the database
-    res.status(200).json(users); // Return users as a JSON response
+    const users = await prisma.customer.findMany();
+    res.status(200).json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Error fetching users" });
@@ -19,17 +19,14 @@ router.get("/all", async (req, res) => {
 router.post("/signup", async (req, res) => {
   const { email, username, password, first_name, last_name } = req.body;
 
-  console.log("Received signup request:", req.body); // Log incoming request body
-
-  // Validate that no fields are blank
+  //make sure no fields are blank
   if (!email || !username || !password || !first_name || !last_name) {
     console.log("Missing required fields");
     return res.status(400).json({ message: "All fields are required." });
   }
 
   try {
-    // Log before checking if the user already exists
-    console.log("Checking for existing user...");
+    //check for existing user
     const existingUser = await prisma.customer.findUnique({
       where: { email },
     });
@@ -39,9 +36,8 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "Email is already in use." });
     }
 
-    // Hash the password using bcrypt
+    //hash password
     const saltRounds = 10;
-    console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Log before creating a new user in the database
@@ -55,10 +51,9 @@ router.post("/signup", async (req, res) => {
         last_name,
       },
     });
-
+    //dsiplay new user in terminal
     console.log("New user created:", newUser);
 
-    // Return success response
     res.status(201).json({
       message: "User created successfully.",
       user: {
@@ -70,7 +65,6 @@ router.post("/signup", async (req, res) => {
       },
     });
   } catch (error) {
-    // Log the error to console
     console.error("Error during signup:", error);
     res.status(500).json({ message: "Failed to create user." });
   }
@@ -80,7 +74,7 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate that both email and password are provided
+  //validate
   if (!email || !password) {
     return res
       .status(400)
@@ -88,26 +82,25 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-    // Look for the user by email in the database
+    //look for user by email
     const user = await prisma.customer.findUnique({ where: { email } });
 
-    // If the user does not exist, return a 404
+    //if user doesnt exist, return 404
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Compare the password with the hashed password stored in the database
+    //compare password with hashed password in database
     const passwordMatch = await bcrypt.compare(password, user.password);
 
-    // If the password doesn't match, return 401 Unauthorized
+    //if password doesnt match, return 401
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid password." });
     }
 
-    // If the login is successful, respond with the email
+    //if login successful, return email address
     res.status(200).json({ message: "Login successful", email: user.email });
   } catch (error) {
-    // Handle unexpected errors (database issues, etc.)
     res.status(500).json({ message: "Internal server error." });
   }
 });
