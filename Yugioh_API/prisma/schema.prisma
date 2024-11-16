@@ -22,6 +22,11 @@ model Product {
   description    String
   cost           Decimal
   image_filename String
+  rarity         String
+  condition      String
+  serialNumber   Int
+  edition        String
+  stockQuantity  Int
 }
 
 // Define the 'customer' model
@@ -31,5 +36,6 @@ model Customer {
   password     String
   first_name   String
   last_name    String
+  username     String  @unique
 }
 
