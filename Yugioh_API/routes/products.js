@@ -18,6 +18,13 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
+  //make sure product id is an integer
+  if (isNaN(id)) {
+    return res
+      .status(400)
+      .json({ message: "Product ID has to be an Integer." });
+  }
+
   try {
     const product = await prisma.product.findUnique({
       where: { product_id: parseInt(id) },
@@ -34,9 +41,117 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-//placeholder purchase route
-router.post("/purchase", (req, res) => {
-  res.status(200).json({ message: "Hello purchase!" });
+//function to convert MM/YY to a valid date
+const convertCreditExpireToDate = (credit_expire) => {
+  const [month, year] = credit_expire.split("/");
+
+  //prepend 20 to year to get 4-digit year
+  const fullYear = `20${year}`;
+
+  //create date object for first day of next month
+  const date = new Date(fullYear, month, 0); //0 = January 11 = December
+
+  return date;
+};
+
+//purchase route
+router.post("/purchase", async (req, res) => {
+  const {
+    street,
+    city,
+    province,
+    country,
+    postal_code,
+    credit_card,
+    credit_expire,
+    credit_cvv,
+    cart,
+    invoice_amt,
+    invoice_tax,
+    invoice_total,
+  } = req.body;
+
+  //check if user is logged in
+  if (!req.session.customer_id) {
+    return res.status(401).json({ message: "User not authenticated." });
+  }
+
+  //validate cart is provided and has items
+  if (!cart || cart.length === 0) {
+    return res.status(400).json({ message: "Cart is empty." });
+  }
+
+  //validate required fields
+  if (
+    !street ||
+    !city ||
+    !province ||
+    !country ||
+    !postal_code ||
+    !credit_card ||
+    !credit_expire ||
+    !credit_cvv ||
+    !invoice_amt ||
+    !invoice_tax ||
+    !invoice_total
+  ) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    //convert credit_expire to a valid date object
+    const creditExpireDate = convertCreditExpireToDate(credit_expire);
+
+    //create the purchase entry
+    const purchase = await prisma.purchase.create({
+      data: {
+        customer_id: req.session.customer_id,
+        street,
+        city,
+        province,
+        country,
+        postal_code,
+        credit_card,
+        credit_expire: creditExpireDate,
+        credit_cvv,
+        invoice_amt: parseFloat(invoice_amt),
+        invoice_tax: parseFloat(invoice_tax),
+        invoice_total: parseFloat(invoice_total),
+        order_date: new Date(),
+      },
+    });
+
+    //parse cart to get product IDs and quantities
+    const productIds = cart.split(",").map((id) => parseInt(id.trim()));
+
+    //group products by product_id, count quantities
+    const productQuantities = productIds.reduce((acc, productId) => {
+      acc[productId] = (acc[productId] || 0) + 1;
+      return acc;
+    }, {});
+
+    //generate the PurchaseItem data with quantities for each product
+    const purchaseItemsData = Object.keys(productQuantities).map(
+      (productId) => ({
+        purchase_id: purchase.purchase_id, //link each item to the purchase
+        product_id: parseInt(productId),
+        quantity: productQuantities[productId], //the correct quantity for each product
+      })
+    );
+
+    //create purchase items
+    await prisma.purchaseItem.createMany({
+      data: purchaseItemsData,
+    });
+
+    res.status(201).json({
+      message: "Purchase completed successfully!",
+      purchase,
+    });
+  } catch (error) {
+    console.error("Error completing purchase:", error);
+    res.status(500).json({ message: "Error completing purchase." });
+  }
 });
 
 export default router;
