@@ -21,7 +21,7 @@ images.forEach((image) => {
   const inputPath = path.join(inputFolder, image);
 
   sharp(inputPath)
-    .resize(300, 435)
+    .resize(300, 438)
     .toBuffer()
     .then((data) => {
       fs.writeFile(inputPath, data, (err) => {

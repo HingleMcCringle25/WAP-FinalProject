@@ -1,0 +1,176 @@
+/* Ensure the product list is displayed as a grid */
+.product-list {
+  display: grid; /* Create a grid container */
+  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+  gap: 16px; /* Space between each product card */
+  padding: 16px;
+}
+
+/* Styling for the individual product card container */
+.product-box {
+  display: flex; /* Use flexbox inside each product card */
+  justify-content: flex-start; /* Align items to the start */
+  align-items: flex-start; /* Align items vertically centered */
+  padding: 16px;
+  border: 1px solid #ddd; /* Border for each card */
+  border-radius: 8px; /* Rounded corners for the card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+  background-color: #fff;
+  overflow: hidden; /* Prevent content from overflowing the card */
+}
+
+/* Adjust the image size and position */
+.product-image {
+  width: 135px; /* Set a fixed width for the image */
+  height: 195px; /* Set a fixed height for the image */
+  object-fit: cover; /* Make sure image covers the area without distortion */
+  margin-right: 16px; /* Space between the image and the details */
+  border-radius: 2px;
+}
+
+/* Container for the product text details */
+.card-info {
+  display: flex;
+  flex-direction: column; /* Stack text vertically */
+  justify-content: flex-start; /* Align text to the top */
+}
+
+/* Style the product name */
+.card-name {
+  font-weight: 700;
+  font-size: 1.3em;
+  margin-bottom: 20px; /* Add space below the name */
+  line-height: 1.3;
+}
+
+/* Style the product rarity */
+.card-rarity {
+  font-style: italic;
+  color: #888;
+  margin-bottom: 8px; /* Space below the rarity */
+  display: block;
+}
+
+/* Style the stock quantity and price */
+.card-price {
+  color: #b12704; /* Price color */
+  font-weight: bold; /* Bold price */
+  font-size: 1.5em; /* Slightly larger font size for price */
+  margin-top: 8px; /* Space above the price */
+  display: block;
+}
+
+/* Optional: Style the card link to ensure it's styled consistently */
+.product-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex; /* Ensure the entire card area is clickable */
+  flex-direction: column; /* Stack content vertically within the card link */
+  height: 100%; /* Make the link take the full height of the card */
+}
+ 
+.card-stock {
+  margin-top: 20px;
+}
+
+/* Hover effect for product cards */
+.product-card:hover .product-box {
+  transform: translateY(-5px); /* Slight lift effect */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* More prominent shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+}
+
+/* src/index.css or a separate CSS file for Nav */
+nav {
+  background-color: #333;
+  padding: 10px;
+}
+
+.nav-list {
+  list-style-type: none;
+  display: flex;
+  justify-content: space-around;
+}
+
+.nav-list li {
+  display: inline;
+}
+
+.nav-list li a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 10px;
+}
+
+.nav-list li a:hover {
+  background-color: #575757;
+  border-radius: 5px;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.cart-item-image {
+  width: 200px;
+  height: 292px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.cart-item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cart-summary {
+  margin-top: 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cart-actions button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cart-actions button:hover {
+  background-color: #0056b3;
+}
+
+.quantity {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.quantity input {
+  width: 50px;
+  padding: 5px;
+}
