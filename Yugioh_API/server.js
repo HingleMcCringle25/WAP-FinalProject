@@ -10,7 +10,15 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
+app.use("/public", express.static("public"));
+app.use(
+  session({
+    secret: "secret-key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, //set to false, HTTPS would have this set to true
+  })
+);
 
 app.use(
   cors({

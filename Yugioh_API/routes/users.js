@@ -1,10 +1,26 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
+import PasswordValidator from "password-validator";
 const prisma = new PrismaClient();
 const router = Router();
 
-//get all users in database
+const passwordSchema = new PasswordValidator();
+
+passwordSchema
+  .is()
+  .min(8)
+  .has()
+  .uppercase()
+  .has()
+  .lowercase()
+  .has()
+  .digits()
+  .has()
+  .not()
+  .spaces();
+
+//get all users in database. For testing purposes
 router.get("/all", async (req, res) => {
   try {
     const users = await prisma.customer.findMany();
@@ -25,6 +41,14 @@ router.post("/signup", async (req, res) => {
     return res.status(400).json({ message: "All fields are required." });
   }
 
+  //validate password
+  if (!passwordSchema.validate(password)) {
+    return res.status(400).json({
+      message:
+        "Password must be minimum 8 characters, one uppercase, one lowercase, one number, and no spaces",
+    });
+  }
+
   try {
     //check for existing user
     const existingUser = await prisma.customer.findUnique({
@@ -37,7 +61,7 @@ router.post("/signup", async (req, res) => {
     }
 
     //hash password
-    const saltRounds = 10;
+    const saltRounds = 11;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Log before creating a new user in the database
@@ -98,6 +122,12 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid password." });
     }
 
+    //store user data session after login
+    req.session.customer_id = user.customer_id;
+    req.session.email = user.email;
+    req.session.first_name = user.first_name;
+    req.session.last_name = user.last_name;
+
     //if login successful, return email address
     res.status(200).json({ message: "Login successful", email: user.email });
   } catch (error) {
@@ -105,14 +135,27 @@ router.post("/login", async (req, res) => {
   }
 });
 
-//placeholder logout route
+//logout route
 router.post("/logout", (req, res) => {
-  res.status(200).json({ message: "Hello logout!" });
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Failed to log out." });
+    }
+    res.status(200).json({ message: "Logged out successfully." });
+  });
 });
 
-//placeholder getsession route
+//getsession route
 router.get("/getSession", (req, res) => {
-  res.status(200).json({ message: "Hello getSession!" });
+  if (req.session.customer_id) {
+    return res.status(200).json({
+      user_id: req.session.customer_id,
+      email: req.session.email,
+      first_name: req.session.first_name,
+      last_name: req.session.last_name,
+    });
+  }
+  res.status(401).json({ message: "Not Logged in" });
 });
 
 export default router;
