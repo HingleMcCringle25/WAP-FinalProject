@@ -31,17 +31,20 @@ router.get("/all", async (req, res) => {
   }
 });
 
-//singup
+// signup
 router.post("/signup", async (req, res) => {
   const { email, username, password, first_name, last_name } = req.body;
 
-  //make sure no fields are blank
+  // Log incoming request data
+  console.log("Received signup request with data:", req.body);
+
+  // Ensure no fields are blank
   if (!email || !username || !password || !first_name || !last_name) {
     console.log("Missing required fields");
     return res.status(400).json({ message: "All fields are required." });
   }
 
-  //validate password
+  // Validate password
   if (!passwordSchema.validate(password)) {
     return res.status(400).json({
       message:
@@ -50,22 +53,29 @@ router.post("/signup", async (req, res) => {
   }
 
   try {
-    //check for existing user
-    const existingUser = await prisma.customer.findUnique({
+    // Check for existing user by email
+    const existingUserByEmail = await prisma.customer.findUnique({
       where: { email },
     });
 
-    if (existingUser) {
+    if (existingUserByEmail) {
       console.log("Email already in use:", email);
       return res.status(400).json({ message: "Email is already in use." });
     }
 
-    //hash password
-    const saltRounds = 11;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // Check for existing user by username
+    const existingUserByUsername = await prisma.customer.findUnique({
+      where: { username },
+    });
 
-    // Log before creating a new user in the database
-    console.log("Creating new user...");
+    if (existingUserByUsername) {
+      return res.status(400).json({ message: "Username is already taken." });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the new user
     const newUser = await prisma.customer.create({
       data: {
         email,
@@ -75,10 +85,12 @@ router.post("/signup", async (req, res) => {
         last_name,
       },
     });
-    //dsiplay new user in terminal
+
+    // Log the created user
     console.log("New user created:", newUser);
 
-    res.status(201).json({
+    // Send a JSON response with the user data
+    const response = {
       message: "User created successfully.",
       user: {
         user_id: newUser.customer_id,
@@ -87,7 +99,11 @@ router.post("/signup", async (req, res) => {
         first_name: newUser.first_name,
         last_name: newUser.last_name,
       },
-    });
+    };
+
+    console.log("Response being sent:", response);
+
+    res.status(201).json(response); // Ensure the response is JSON
   } catch (error) {
     console.error("Error during signup:", error);
     res.status(500).json({ message: "Failed to create user." });
@@ -156,6 +172,32 @@ router.get("/getSession", (req, res) => {
     });
   }
   res.status(401).json({ message: "Not Logged in" });
+});
+
+// DELETE user route. FOR TESTING PURPOSES
+router.delete("/delete/:userId", async (req, res) => {
+  const { userId } = req.params; // Get the user ID from the URL parameter
+
+  try {
+    // Check if the user exists in the database
+    const existingUser = await prisma.customer.findUnique({
+      where: { customer_id: parseInt(userId) },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Delete the user from the database
+    await prisma.customer.delete({
+      where: { customer_id: parseInt(userId) },
+    });
+
+    res.status(200).json({ message: "User deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Failed to delete user." });
+  }
 });
 
 export default router;

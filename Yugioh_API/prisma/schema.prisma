@@ -21,7 +21,6 @@ model Product {
   name           String
   description    String
   cost           Float
-  cost           Float
   image_filename String
   rarity         String
   condition      String
@@ -29,13 +28,10 @@ model Product {
   edition        String
   stockQuantity  Int
   purchaseItems  PurchaseItem[] // Reverse relation to PurchaseItem
-  purchaseItems  PurchaseItem[] // Reverse relation to PurchaseItem
 }
 
 // Define the 'customer' model
 model Customer {
-  customer_id  Int       @id @default(autoincrement())
-  email        String    @unique
   customer_id  Int       @id @default(autoincrement())
   email        String    @unique
   password     String
@@ -57,9 +53,6 @@ model Purchase {
   credit_card   String
   credit_expire DateTime
   credit_cvv    String
-  invoice_amt   Float
-  invoice_tax   Float
-  invoice_total Float
   order_date    DateTime
   customer      Customer   @relation(fields: [customer_id], references: [customer_id])
   purchaseItems PurchaseItem[]
