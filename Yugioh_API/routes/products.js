@@ -73,7 +73,7 @@ router.post("/purchase", async (req, res) => {
     return res.status(401).json({ message: "User not authenticated." });
   }
 
-  console.log("Session:", req.session);
+  console.log("Session during purchase:", req.session);
 
   //validate cart is provided and has items
   if (!cart || cart.length === 0) {
