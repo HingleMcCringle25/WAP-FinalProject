@@ -1,9 +1,9 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import session from "express-session";
-import usersRouter from "./routes/users.js";
 import insertProductsRouter from "./routes/insertProducts.js";
 import productsRouter from "./routes/products.js";
+import usersRouter from "./routes/users.js";
 
 const port = process.env.PORT || 3200;
 const app = express();
@@ -16,7 +16,11 @@ app.use(
     secret: "secret-key",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, //set to false, HTTPS would have this set to true
+    cookie: {
+      secure: true, //set to false, HTTPS would have this set to true
+      maxAge: 3600000,
+      sameSite: "None",
+    },
   })
 );
 

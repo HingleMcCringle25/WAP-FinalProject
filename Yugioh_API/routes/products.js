@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
+import { Router } from "express";
 const prisma = new PrismaClient();
 const router = Router();
 
@@ -66,15 +66,14 @@ router.post("/purchase", async (req, res) => {
     credit_expire,
     credit_cvv,
     cart,
-    invoice_amt,
-    invoice_tax,
-    invoice_total,
   } = req.body;
 
   //check if user is logged in
   if (!req.session.customer_id) {
     return res.status(401).json({ message: "User not authenticated." });
   }
+
+  console.log("Session during purchase:", req.session);
 
   //validate cart is provided and has items
   if (!cart || cart.length === 0) {
@@ -90,10 +89,7 @@ router.post("/purchase", async (req, res) => {
     !postal_code ||
     !credit_card ||
     !credit_expire ||
-    !credit_cvv ||
-    !invoice_amt ||
-    !invoice_tax ||
-    !invoice_total
+    !credit_cvv
   ) {
     return res.status(400).json({ message: "All fields are required." });
   }
@@ -114,9 +110,6 @@ router.post("/purchase", async (req, res) => {
         credit_card,
         credit_expire: creditExpireDate,
         credit_cvv,
-        invoice_amt: parseFloat(invoice_amt),
-        invoice_tax: parseFloat(invoice_tax),
-        invoice_total: parseFloat(invoice_total),
         order_date: new Date(),
       },
     });

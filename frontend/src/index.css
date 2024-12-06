@@ -1,58 +1,61 @@
 
 .product-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 16px; 
   padding: 16px;
 }
 
 
 .product-box {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+  display: flex; 
+  justify-content: flex-start; 
+  align-items: flex-start; 
   padding: 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd; 
+  border-radius: 8px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
   background-color: #fff;
-  overflow: hidden;
+  overflow: hidden; 
 }
 
+
 .product-image {
-  width: 135px;
-  height: 195px;
-  object-fit: cover;
-  margin-right: 16px;
+  width: 135px; 
+  height: 195px; 
+  object-fit: cover; 
+  margin-right: 16px; 
   border-radius: 2px;
 }
 
-
 .card-info {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  flex-direction: column; 
+  justify-content: flex-start; 
 }
+
 
 .card-name {
   font-weight: 700;
   font-size: 1.3em;
-  margin-bottom: 20px;
+  margin-bottom: 20px; 
   line-height: 1.3;
 }
+
 
 .card-rarity {
   font-style: italic;
   color: #888;
-  margin-bottom: 8px;
+  margin-bottom: 8px; 
   display: block;
 }
 
+
 .card-price {
-  color: #b12704;
-  font-weight: bold;
-  font-size: 1.5em;
-  margin-top: 8px;
+  color: #b12704; 
+  font-weight: bold; 
+  font-size: 1.5em; 
+  margin-top: 8px; 
   display: block;
 }
 
@@ -60,20 +63,20 @@
 .product-link {
   text-decoration: none;
   color: inherit;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: flex; 
+  flex-direction: column; 
+  height: 100%; 
 }
-
+ 
 .card-stock {
   margin-top: 20px;
 }
 
 
 .product-card:hover .product-box {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform: translateY(-5px); 
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease; 
 }
 
 nav {
@@ -169,3 +172,28 @@ nav {
   width: 50px;
   padding: 5px;
 }
+
+.confirmation {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.confirmation h2 {
+  color: green;
+  font-size: 2em;
+}
+
+.confirmation button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.confirmation button:hover {
+  background-color: #0056b3;
+}
+

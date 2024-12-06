@@ -54,6 +54,7 @@ function Details() {
             className="product-detail-img"
           />
         </div>
+
         <div className="product-detail-info">
           <h2>{product.name}</h2>
           <p>

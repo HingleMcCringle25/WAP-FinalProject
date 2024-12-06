@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
-  const [quantities, setQuantities] = useState({});
   const [subtotal, setSubtotal] = useState(0);
+  const [tax, setTax] = useState(0);
+  const [grandTotal, setGrandTotal] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-  
     const cart = Cookies.get("cart");
     if (cart) {
       const productIds = cart.split(",");
@@ -36,11 +36,17 @@ function Cart() {
   };
 
   useEffect(() => {
+    // Calculate the subtotal, tax, and grand total whenever cartItems changes
     const total = cartItems.reduce(
       (sum, item) => sum + item.cost * item.quantity,
       0
     );
+    const calculatedTax = total * 0.15; // Assuming a 15% tax rate
+    const totalWithTax = total + calculatedTax;
+
     setSubtotal(total);
+    setTax(calculatedTax);
+    setGrandTotal(totalWithTax);
   }, [cartItems]);
 
   const updateCartCookie = (updatedProductIds) => {
@@ -55,6 +61,7 @@ function Cart() {
     if (productIndex !== -1) {
       updatedCartItems[productIndex].quantity = newQuantity;
     }
+
     const updatedProductIds = [];
     updatedCartItems.forEach((item) => {
       for (let i = 0; i < item.quantity; i++) {
@@ -70,6 +77,7 @@ function Cart() {
     const updatedCartItems = cartItems.filter(
       (item) => item.product_id !== productId
     );
+
     const updatedProductIds = updatedCartItems.flatMap((item) =>
       Array(item.quantity).fill(item.product_id)
     );
@@ -79,11 +87,11 @@ function Cart() {
   };
 
   const handleContinueShopping = () => {
-    navigate("/");
+    navigate("/"); // Navigate to the home page
   };
 
   const handleCompletePurchase = () => {
-    navigate("/checkout");
+    navigate("/checkout"); // Navigate to the checkout page
   };
 
   return (
@@ -122,7 +130,7 @@ function Cart() {
                 </div>
 
                 <p>Total: ${(product.cost * product.quantity).toFixed(2)}</p>
-                
+
                 <button
                   onClick={() => handleRemoveFromCart(product.product_id)}
                 >
@@ -137,6 +145,8 @@ function Cart() {
       {cartItems.length > 0 && (
         <div className="cart-summary">
           <p>Subtotal: ${subtotal.toFixed(2)}</p>
+          <p>Tax: ${tax.toFixed(2)}</p>
+          <p>Grand Total: ${grandTotal.toFixed(2)}</p>
           <div className="cart-actions">
             <button onClick={handleContinueShopping}>Continue Shopping</button>
             <button onClick={handleCompletePurchase}>Move to Checkout</button>
