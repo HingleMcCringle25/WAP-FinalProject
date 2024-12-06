@@ -172,3 +172,28 @@ nav {
   width: 50px;
   padding: 5px;
 }
+
+.confirmation {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.confirmation h2 {
+  color: green;
+  font-size: 2em;
+}
+
+.confirmation button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.confirmation button:hover {
+  background-color: #0056b3;
+}
+

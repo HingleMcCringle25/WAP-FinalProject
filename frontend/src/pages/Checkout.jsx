@@ -21,12 +21,12 @@ function Checkout() {
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  // Check if the user is logged in after the component mounts
+  //check if the user is logged in
   useEffect(() => {
     setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
   }, []);
 
-  // If the user is not logged in, display a message and redirect to login
+  //if the user is not logged in, display a message and redirect to login
   if (!isLoggedIn) {
     return (
       <div>
@@ -38,7 +38,7 @@ function Checkout() {
     );
   }
 
-  // Handle input field changes for address and credit card fields
+  //handle input field changes for address and credit card fields
   const handleInputChange = (e, field, stateSetter) => {
     stateSetter((prev) => ({
       ...prev,
@@ -46,7 +46,7 @@ function Checkout() {
     }));
   };
 
-  // Handle the purchase logic when the form is submitted
+  //handle the purchase logic when the form is submitted
   const handlePurchase = async (e) => {
     e.preventDefault();
     const cart = Cookies.get("cart");
@@ -62,7 +62,7 @@ function Checkout() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", // Ensures session cookies are sent with the request
+          credentials: "include", //ensures session cookies are sent with request
           body: JSON.stringify({
             address,
             creditCard,
@@ -72,8 +72,8 @@ function Checkout() {
       );
 
       if (response.ok) {
-        Cookies.remove("cart"); // Clear the cart
-        navigate("/confirmation"); // Redirect to Confirmation page
+        Cookies.remove("cart"); //clear cart
+        navigate("/confirmation");
       } else {
         const result = await response.json();
         setErrorMessage(result.message || "Failed to complete purchase.");
@@ -89,7 +89,6 @@ function Checkout() {
       <h2>Checkout</h2>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <form onSubmit={handlePurchase}>
-        {/* Address Inputs */}
         <div>
           <label>Street:</label>
           <input
@@ -136,11 +135,10 @@ function Checkout() {
           />
         </div>
 
-        {/* Credit Card Inputs */}
         <div>
           <label>Credit Card Number:</label>
           <input
-            type="tel" // Better experience on mobile for credit card input
+            type="tel"
             value={creditCard.number}
             onChange={(e) => handleInputChange(e, "number", setCreditCard)}
             required
@@ -158,7 +156,7 @@ function Checkout() {
         <div>
           <label>CVV:</label>
           <input
-            type="tel" // Better experience for CVV input
+            type="tel"
             value={creditCard.cvv}
             onChange={(e) => handleInputChange(e, "cvv", setCreditCard)}
             required
