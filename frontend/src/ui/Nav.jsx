@@ -1,48 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "../contexts/CartContext"; // Import the context
+import { FaShoppingCart } from "react-icons/fa"; // Import shopping cart icon
 
-function Nav() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  useEffect(() => {
-    const loggedInStatus = localStorage.getItem("isLoggedIn");
-    setIsLoggedIn(loggedInStatus === "true");
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.setItem("isLoggedIn", "false");
-    setIsLoggedIn(false);
-  };
-
-  const handleLogin = () => {
-    localStorage.setItem("isLoggedIn", "true");
-    setIsLoggedIn(true);
-  };
+function Nav({ isLoggedIn }) {
+  const { cartItemCount } = useCart(); // Get cartItemCount from context
 
   return (
     <nav>
       <ul className="nav-list">
         <li>
-          <Link to="/">Home</Link>
+          <Link to="/home">Home</Link>
         </li>
         <li>
-          <Link to="/cart">Cart</Link>
+          <Link to="/cart">
+            {/* Cart icon followed by text */}
+            <FaShoppingCart /> Cart ({cartItemCount})
+          </Link>
         </li>
         {isLoggedIn ? (
-          <>
-            <li>
-              <Link to="/logout" onClick={handleLogout}>
-                Logout
-              </Link>
-            </li>
-          </>
+          <li>
+            <Link to="/logout">Logout</Link>
+          </li>
         ) : (
-          <>
-            <li>
-              <Link to="/login" onClick={handleLogin}>
-                Login
-              </Link>
-            </li>
-          </>
+          <li>
+            <Link to="/login">Login</Link>
+          </li>
         )}
       </ul>
     </nav>

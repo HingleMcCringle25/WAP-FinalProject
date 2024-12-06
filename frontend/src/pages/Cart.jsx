@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie"; // Import js-cookie to handle cookies
+import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
-  const [quantities, setQuantities] = useState({}); // To store quantities for each product
   const [subtotal, setSubtotal] = useState(0);
+  const [tax, setTax] = useState(0);
+  const [grandTotal, setGrandTotal] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Retrieve the cart from the cookie
     const cart = Cookies.get("cart");
     if (cart) {
       const productIds = cart.split(",");
@@ -18,7 +18,7 @@ function Cart() {
   }, []);
 
   const fetchCartProducts = async (productIds) => {
-    const uniqueProductIds = [...new Set(productIds)]; // Make sure product IDs are unique
+    const uniqueProductIds = [...new Set(productIds)];
     const fetchedProducts = [];
 
     for (let id of uniqueProductIds) {
@@ -36,21 +36,24 @@ function Cart() {
   };
 
   useEffect(() => {
-    // Calculate the subtotal whenever the cart items change
+    // Calculate the subtotal, tax, and grand total whenever cartItems changes
     const total = cartItems.reduce(
       (sum, item) => sum + item.cost * item.quantity,
       0
     );
+    const calculatedTax = total * 0.15; // Assuming a 15% tax rate
+    const totalWithTax = total + calculatedTax;
+
     setSubtotal(total);
+    setTax(calculatedTax);
+    setGrandTotal(totalWithTax);
   }, [cartItems]);
 
   const updateCartCookie = (updatedProductIds) => {
-    // Update the cookie with the new product IDs list
     Cookies.set("cart", updatedProductIds.join(","));
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    // Update the quantity and recalculate the cart
     const updatedCartItems = [...cartItems];
     const productIndex = updatedCartItems.findIndex(
       (item) => item.product_id === productId
@@ -59,7 +62,6 @@ function Cart() {
       updatedCartItems[productIndex].quantity = newQuantity;
     }
 
-    // Update cookie with the new quantity
     const updatedProductIds = [];
     updatedCartItems.forEach((item) => {
       for (let i = 0; i < item.quantity; i++) {
@@ -68,26 +70,24 @@ function Cart() {
     });
 
     setCartItems(updatedCartItems);
-    updateCartCookie(updatedProductIds); // Update the cookie
+    updateCartCookie(updatedProductIds);
   };
 
   const handleRemoveFromCart = (productId) => {
-    // Remove product from cart
     const updatedCartItems = cartItems.filter(
       (item) => item.product_id !== productId
     );
 
-    // Rebuild product IDs list for the cookie
     const updatedProductIds = updatedCartItems.flatMap((item) =>
       Array(item.quantity).fill(item.product_id)
     );
 
     setCartItems(updatedCartItems);
-    updateCartCookie(updatedProductIds); // Update the cookie
+    updateCartCookie(updatedProductIds);
   };
 
   const handleContinueShopping = () => {
-    navigate("/"); // Navigate back to the home page
+    navigate("/"); // Navigate to the home page
   };
 
   const handleCompletePurchase = () => {
@@ -114,7 +114,6 @@ function Cart() {
                 <h3>{product.name}</h3>
                 <p>Price: ${product.cost}</p>
 
-                {/* Quantity update input */}
                 <div className="quantity">
                   <label>Quantity:</label>
                   <input
@@ -132,7 +131,6 @@ function Cart() {
 
                 <p>Total: ${(product.cost * product.quantity).toFixed(2)}</p>
 
-                {/* Remove from cart button */}
                 <button
                   onClick={() => handleRemoveFromCart(product.product_id)}
                 >
@@ -147,6 +145,8 @@ function Cart() {
       {cartItems.length > 0 && (
         <div className="cart-summary">
           <p>Subtotal: ${subtotal.toFixed(2)}</p>
+          <p>Tax: ${tax.toFixed(2)}</p>
+          <p>Grand Total: ${grandTotal.toFixed(2)}</p>
           <div className="cart-actions">
             <button onClick={handleContinueShopping}>Continue Shopping</button>
             <button onClick={handleCompletePurchase}>Move to Checkout</button>
