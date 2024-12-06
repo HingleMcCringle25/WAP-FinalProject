@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; // Import Link component for routing
+import { Link } from "react-router-dom";
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -11,7 +11,7 @@ function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       const apiUrl = import.meta.env.VITE_API_HOST + "/api/products";
-      console.log("Fetching products from:", apiUrl); // Debugging API URL
+      console.log("Fetching products from:", apiUrl);
 
       try {
         const response = await fetch(apiUrl);
@@ -19,7 +19,7 @@ function Home() {
           throw new Error("Error fetching products");
         }
         const data = await response.json();
-        setProducts(data); // Update state with fetched products
+        setProducts(data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -27,7 +27,6 @@ function Home() {
     fetchProducts();
   }, []);
 
-  // Check the products state after it's updated
   useEffect(() => {
     console.log("Products state:", products);
   }, [products]);
@@ -41,7 +40,6 @@ function Home() {
         ) : (
           products.map((product) => (
             <div key={product.product_id} className="product-card">
-              {/* Use Link to navigate to the details page */}
               <Link
                 to={`/details/${product.product_id}`}
                 className="product-link"

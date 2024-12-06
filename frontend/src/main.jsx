@@ -1,25 +1,22 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom"; // Import Router components
-import "./index.css";
+import { BrowserRouter, Route, Routes } from "react-router-dom"; // Import Router components
 import App from "./App.jsx";
-import Home from "./pages/Home.jsx";
-import Details from "./pages/Details.jsx";
-import Signup from "./pages/Signup.jsx";
-import Login from "./pages/Login.jsx";
-import Logout from "./pages/Logout.jsx";
+import "./index.css";
 import Cart from "./pages/Cart.jsx";
 import Checkout from "./pages/Checkout.jsx";
 import Confirmation from "./pages/Confirmation.jsx";
+import Details from "./pages/Details.jsx";
+import Home from "./pages/Home.jsx";
+import Login from "./pages/Login.jsx";
+import Logout from "./pages/Logout.jsx";
+import Signup from "./pages/Signup.jsx";
 
-// Set up routes and wrap the app in BrowserRouter
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        {/* Parent route with 'App' component */}
         <Route path="/" element={<App />}>
-          {/* Child routes */}
           <Route index element={<Home />} />
           <Route path="details/:id" element={<Details />} />
           <Route path="signup" element={<Signup />} />

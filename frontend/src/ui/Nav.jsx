@@ -1,24 +1,21 @@
 // src/ui/Nav.jsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function Nav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check if the user is logged in based on localStorage or other method
   useEffect(() => {
     const loggedInStatus = localStorage.getItem("isLoggedIn");
     setIsLoggedIn(loggedInStatus === "true");
   }, []);
 
   const handleLogout = () => {
-    // Log the user out by removing their logged-in status
     localStorage.setItem("isLoggedIn", "false");
     setIsLoggedIn(false);
   };
 
   const handleLogin = () => {
-    // Log the user in
     localStorage.setItem("isLoggedIn", "true");
     setIsLoggedIn(true);
   };

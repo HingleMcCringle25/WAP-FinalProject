@@ -3,12 +3,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function Details() {
-  const { id } = useParams(); // Get product ID from the URL params
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const navigate = useNavigate(); // Initialize navigate for "Go back" functionality
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch product details based on the ID from the URL
     const fetchProduct = async () => {
       try {
         const response = await fetch(
@@ -16,7 +15,7 @@ function Details() {
         );
         if (response.ok) {
           const data = await response.json();
-          setProduct(data); // Update state with the fetched product details
+          setProduct(data);
         } else {
           console.error("Failed to fetch product:", response.statusText);
         }
@@ -36,7 +35,7 @@ function Details() {
   };
 
   const handleGoBack = () => {
-    navigate("/"); 
+    navigate("/");
   };
 
   if (!product) {
@@ -46,7 +45,6 @@ function Details() {
   return (
     <div className="product-detail-container">
       <div className="product-detail-box">
-        {/* Image Box (on left) */}
         <div className="product-image-container">
           <img
             src={`${import.meta.env.VITE_API_HOST}/public/images/${
@@ -56,8 +54,6 @@ function Details() {
             className="product-detail-img"
           />
         </div>
-
-        {/* Product Info Box (on right) */}
         <div className="product-detail-info">
           <h2>{product.name}</h2>
           <p>

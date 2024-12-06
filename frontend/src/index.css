@@ -1,86 +1,81 @@
-/* Ensure the product list is displayed as a grid */
+
 .product-list {
-  display: grid; /* Create a grid container */
-  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
-  gap: 16px; /* Space between each product card */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
   padding: 16px;
 }
 
-/* Styling for the individual product card container */
+
 .product-box {
-  display: flex; /* Use flexbox inside each product card */
-  justify-content: flex-start; /* Align items to the start */
-  align-items: flex-start; /* Align items vertically centered */
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
   padding: 16px;
-  border: 1px solid #ddd; /* Border for each card */
-  border-radius: 8px; /* Rounded corners for the card */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #fff;
-  overflow: hidden; /* Prevent content from overflowing the card */
+  overflow: hidden;
 }
 
-/* Adjust the image size and position */
 .product-image {
-  width: 135px; /* Set a fixed width for the image */
-  height: 195px; /* Set a fixed height for the image */
-  object-fit: cover; /* Make sure image covers the area without distortion */
-  margin-right: 16px; /* Space between the image and the details */
+  width: 135px;
+  height: 195px;
+  object-fit: cover;
+  margin-right: 16px;
   border-radius: 2px;
 }
 
-/* Container for the product text details */
+
 .card-info {
   display: flex;
-  flex-direction: column; /* Stack text vertically */
-  justify-content: flex-start; /* Align text to the top */
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
-/* Style the product name */
 .card-name {
   font-weight: 700;
   font-size: 1.3em;
-  margin-bottom: 20px; /* Add space below the name */
+  margin-bottom: 20px;
   line-height: 1.3;
 }
 
-/* Style the product rarity */
 .card-rarity {
   font-style: italic;
   color: #888;
-  margin-bottom: 8px; /* Space below the rarity */
+  margin-bottom: 8px;
   display: block;
 }
 
-/* Style the stock quantity and price */
 .card-price {
-  color: #b12704; /* Price color */
-  font-weight: bold; /* Bold price */
-  font-size: 1.5em; /* Slightly larger font size for price */
-  margin-top: 8px; /* Space above the price */
+  color: #b12704;
+  font-weight: bold;
+  font-size: 1.5em;
+  margin-top: 8px;
   display: block;
 }
 
-/* Optional: Style the card link to ensure it's styled consistently */
+
 .product-link {
   text-decoration: none;
   color: inherit;
-  display: flex; /* Ensure the entire card area is clickable */
-  flex-direction: column; /* Stack content vertically within the card link */
-  height: 100%; /* Make the link take the full height of the card */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
- 
+
 .card-stock {
   margin-top: 20px;
 }
 
-/* Hover effect for product cards */
+
 .product-card:hover .product-box {
-  transform: translateY(-5px); /* Slight lift effect */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* More prominent shadow */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* src/index.css or a separate CSS file for Nav */
 nav {
   background-color: #333;
   padding: 10px;
