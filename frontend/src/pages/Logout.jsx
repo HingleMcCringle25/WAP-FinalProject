@@ -1,37 +1,48 @@
-import { useNavigate, useOutletContext } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useOutletContext } from "react-router-dom";
 
 const Logout = () => {
-  const navigate = useNavigate();
-  const setIsLoggedIn = useOutletContext(); // Access setIsLoggedIn function
+  const [message, setMessage] = useState("");
+  const setIsLoggedIn = useOutletContext();
+  useEffect(() => {
+    const logoutUser = async () => {
+      try {
+        const response = await fetch("http://localhost:3200/api/users/logout", {
+          method: "POST",
+          credentials: "include",
+        });
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch("http://localhost:3200/api/users/logout", {
-        method: "POST",
-      });
+        if (!response.ok) {
+          const result = await response.json();
+          throw new Error(result.message || "Failed to log out.");
+        }
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setIsLoggedIn(false); // Set isLoggedIn to false on successful logout
-        localStorage.setItem("isLoggedIn", "false");
-        navigate("/login");
-      } else {
-        alert(result.message || "Logout failed. Please try again.");
+        setMessage("You have been logged out successfully.");
+        setIsLoggedIn(false); 
+      } catch (error) {
+        setMessage(error.message);
       }
-    } catch (error) {
-      console.error("Error during logout:", error);
-      alert("An error occurred during logout. Please try again.");
-    }
-  };
+    };
+
+    logoutUser();
+  }, [setIsLoggedIn]);
 
   return (
-    <div>
-      <h2>Logged Out</h2>
-      <p>You have successfully logged out.</p>
-      <button onClick={handleLogout}>Go to Login Page</button>
+    <div className="logout">
+      <h1>Logout</h1>
+      <p>{message}</p>
+      <div className="logout-links">
+        <Link to="/login">Go to Login</Link>
+        <br />
+        <Link to="/">Go to Home</Link>
+      </div>
     </div>
   );
 };
 
 export default Logout;
+
+
+
+
+

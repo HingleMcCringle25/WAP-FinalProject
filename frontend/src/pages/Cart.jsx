@@ -1,160 +1,155 @@
 import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Cart() {
+const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
-  const [subtotal, setSubtotal] = useState(0);
-  const [tax, setTax] = useState(0);
-  const [grandTotal, setGrandTotal] = useState(0);
   const navigate = useNavigate();
+  const taxRate = 0.15;
 
   useEffect(() => {
-    const cart = Cookies.get("cart");
-    if (cart) {
-      const productIds = cart.split(",");
-      fetchCartProducts(productIds);
-    }
+    const fetchCartItems = async () => {
+      try {
+        const cartCookie = Cookies.get("cart");
+        if (!cartCookie) {
+          setCartItems([]);
+          return;
+        }
+
+        const productIds = cartCookie.split(",");
+        const productCounts = productIds.reduce((acc, id) => {
+          acc[id] = (acc[id] || 0) + 1;
+          return acc;
+        }, {});
+
+        const uniqueIds = [...new Set(productIds)];
+        const productPromises = uniqueIds.map((id) =>
+          fetch(`http://localhost:3200/api/products/${id}`, {
+            credentials: "include",
+          }).then((res) => res.json())
+        );
+
+        const products = await Promise.all(productPromises);
+
+        const items = products.map((product) => ({
+          ...product,
+          quantity: productCounts[product.product_id],
+        }));
+
+        setCartItems(items);
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+      }
+    };
+
+    fetchCartItems();
   }, []);
 
-  const fetchCartProducts = async (productIds) => {
-    const uniqueProductIds = [...new Set(productIds)];
-    const fetchedProducts = [];
-
-    for (let id of uniqueProductIds) {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_HOST}/api/products/${id}`
-      );
-      if (response.ok) {
-        const product = await response.json();
-        const productQuantity = productIds.filter((pid) => pid === id).length;
-        fetchedProducts.push({ ...product, quantity: productQuantity });
-      }
-    }
-
-    setCartItems(fetchedProducts);
-  };
-
-  useEffect(() => {
-    // Calculate the subtotal, tax, and grand total whenever cartItems changes
-    const total = cartItems.reduce(
-      (sum, item) => sum + item.cost * item.quantity,
-      0
-    );
-    const calculatedTax = total * 0.15; // Assuming a 15% tax rate
-    const totalWithTax = total + calculatedTax;
-
-    setSubtotal(total);
-    setTax(calculatedTax);
-    setGrandTotal(totalWithTax);
-  }, [cartItems]);
-
-  const updateCartCookie = (updatedProductIds) => {
-    Cookies.set("cart", updatedProductIds.join(","));
-  };
-
   const handleQuantityChange = (productId, newQuantity) => {
-    const updatedCartItems = [...cartItems];
-    const productIndex = updatedCartItems.findIndex(
-      (item) => item.product_id === productId
+    if (newQuantity < 1) return; 
+
+    
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.product_id === productId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
     );
-    if (productIndex !== -1) {
-      updatedCartItems[productIndex].quantity = newQuantity;
-    }
 
-    const updatedProductIds = [];
-    updatedCartItems.forEach((item) => {
-      for (let i = 0; i < item.quantity; i++) {
-        updatedProductIds.push(item.product_id);
-      }
-    });
-
-    setCartItems(updatedCartItems);
-    updateCartCookie(updatedProductIds);
+    
+    const cartCookie = Cookies.get("cart");
+    const productIds = cartCookie.split(",");
+    const updatedCart = productIds
+      .filter((id) => id !== productId.toString())
+      .concat(Array(newQuantity).fill(productId.toString()));
+    Cookies.set("cart", updatedCart.join(","), { expires: 7 });
   };
 
   const handleRemoveFromCart = (productId) => {
-    const updatedCartItems = cartItems.filter(
-      (item) => item.product_id !== productId
+    
+    const cartCookie = Cookies.get("cart");
+    if (!cartCookie) return;
+
+    
+    const productIds = cartCookie.split(",");
+    const updatedCart = productIds.filter((id) => id !== productId.toString());
+    Cookies.set("cart", updatedCart.join(","), { expires: 7 });
+
+    
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => item.product_id !== productId)
     );
-
-    const updatedProductIds = updatedCartItems.flatMap((item) =>
-      Array(item.quantity).fill(item.product_id)
-    );
-
-    setCartItems(updatedCartItems);
-    updateCartCookie(updatedProductIds);
   };
 
-  const handleContinueShopping = () => {
-    navigate("/"); // Navigate to the home page
-  };
-
-  const handleCompletePurchase = () => {
-    navigate("/checkout"); // Navigate to the checkout page
-  };
+  const subtotal = cartItems.reduce(
+    (total, item) => total + item.cost * item.quantity,
+    0
+  );
+  const tax = subtotal * taxRate;
+  const total = subtotal + tax;
 
   return (
-    <div>
-      <h2>Your Cart</h2>
-      <div className="cart-items">
-        {cartItems.length === 0 ? (
-          <p>Your cart is empty.</p>
-        ) : (
-          cartItems.map((product) => (
-            <div key={product.product_id} className="cart-item">
-              <img
-                src={`${import.meta.env.VITE_API_HOST}/public/images/${
-                  product.image_filename
-                }`}
-                alt={product.name}
-                className="cart-item-image"
-              />
-              <div className="cart-item-details">
-                <h3>{product.name}</h3>
-                <p>Price: ${product.cost}</p>
-
-                <div className="quantity">
-                  <label>Quantity:</label>
-                  <input
-                    type="number"
-                    value={product.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        product.product_id,
-                        parseInt(e.target.value)
-                      )
-                    }
-                    min="1"
-                  />
+    <div className="Your-Cart">
+      <h1>Your Cart</h1>
+      {cartItems.length === 0 ? (
+        <p>Your cart is empty.</p>
+      ) : (
+        <>
+          <div className="cart-items">
+            {cartItems.map((item) => (
+              <div key={item.product_id} className="cart-item">
+                <img
+                  src={`http://localhost:3200/public/images/${item.image_filename}`}
+                  alt={item.name}
+                  style={{ maxWidth: "100px" }}
+                />
+                <div className="cart-details">
+                  <h2>{item.name}</h2>
+                  <p>Price: ${item.cost.toFixed(2)}</p>
+                  <div className="quantity-control">
+                    Quantity:
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        handleQuantityChange(
+                          item.product_id,
+                          parseInt(e.target.value) || 1
+                        )
+                      }
+                      min="1"
+                    />
+                    
+                  </div>
+                  <p>Item Total: ${(item.cost * item.quantity).toFixed(2)}</p>
+                  <button onClick={() => handleRemoveFromCart(item.product_id)}>
+                    Remove
+                  </button>
                 </div>
-
-                <p>Total: ${(product.cost * product.quantity).toFixed(2)}</p>
-
-                <button
-                  onClick={() => handleRemoveFromCart(product.product_id)}
-                >
-                  Remove
-                </button>
               </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {cartItems.length > 0 && (
-        <div className="cart-summary">
-          <p>Subtotal: ${subtotal.toFixed(2)}</p>
-          <p>Tax: ${tax.toFixed(2)}</p>
-          <p>Grand Total: ${grandTotal.toFixed(2)}</p>
-          <div className="cart-actions">
-            <button onClick={handleContinueShopping}>Continue Shopping</button>
-            <button onClick={handleCompletePurchase}>Move to Checkout</button>
+            ))}
           </div>
-        </div>
+          <div className="cart-summary">
+            <h3>Sub-total: ${subtotal.toFixed(2)}</h3>
+            <h3>Tax: ${tax.toFixed(2)}</h3>
+            <h3>Total: ${total.toFixed(2)}</h3>
+          </div>
+          <div className="cart-actions">
+            <button onClick={() => navigate("/")}>Continue Shopping</button>
+            <button onClick={() => navigate("/checkout")}>
+              Go to Checkout
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
-}
+};
 
 export default Cart;
+
+
+
+
+

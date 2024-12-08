@@ -1,172 +1,183 @@
 import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
-function Checkout() {
-  const [address, setAddress] = useState({
+const Checkout = () => {
+  const setIsLoggedIn = useOutletContext();
+  const [isLoggedIn, setIsLoggedInState] = useState(false);
+  const [formData, setFormData] = useState({
     street: "",
     city: "",
     province: "",
     country: "",
     postal_code: "",
+    credit_card: "",
+    credit_expire: "",
+    credit_cvv: "",
   });
-  const [creditCard, setCreditCard] = useState({
-    number: "",
-    expire: "",
-    cvv: "",
-  });
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    localStorage.getItem("isLoggedIn") === "true"
-  );
-  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  //check if the user is logged in
   useEffect(() => {
-    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:3200/api/users/getSession", {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          setIsLoggedInState(false);
+          return;
+        }
+
+        setIsLoggedInState(true);
+      } catch (error) {
+        setIsLoggedInState(false);
+      }
+    };
+
+    checkLoginStatus();
   }, []);
 
-  //if the user is not logged in, display a message and redirect to login
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const cart = Cookies.get("cart");
+      if (!cart) {
+        alert("Your cart is empty.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:3200/api/products/purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ ...formData, cart }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Failed to complete the purchase.");
+      }
+
+      Cookies.remove("cart");
+      alert("Purchase completed successfully!");
+      navigate("/confirmation");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <div>
+        <h1>Checkout</h1>
         <p>You must be logged in to proceed to checkout.</p>
-        <Link to="/login" state={{ from: "/checkout" }}>
-          Login
-        </Link>
+        <p>
+          <a href="/login">Click here to log in</a>.
+        </p>
       </div>
     );
   }
 
-  //handle input field changes for address and credit card fields
-  const handleInputChange = (e, field, stateSetter) => {
-    stateSetter((prev) => ({
-      ...prev,
-      [field]: e.target.value,
-    }));
-  };
-
-  //handle the purchase logic when the form is submitted
-  const handlePurchase = async (e) => {
-    e.preventDefault();
-    const cart = Cookies.get("cart");
-    if (!cart) {
-      setErrorMessage("Your cart is empty.");
-      return;
-    }
-
-    const productIds = cart.split(",");
-    try {
-      const response = await fetch(
-        "http://localhost:3200/api/products/purchase",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", //ensures session cookies are sent with request
-          body: JSON.stringify({
-            address,
-            creditCard,
-            productIds,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        Cookies.remove("cart"); //clear cart
-        navigate("/confirmation");
-      } else {
-        const result = await response.json();
-        setErrorMessage(result.message || "Failed to complete purchase.");
-      }
-    } catch (error) {
-      console.error("Error processing purchase:", error);
-      setErrorMessage("An error occurred. Please try again.");
-    }
-  };
-
   return (
-    <div>
-      <h2>Checkout</h2>
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-      <form onSubmit={handlePurchase}>
-        <div>
-          <label>Street:</label>
+    <div className="checkout-page">
+      <h1>Checkout</h1>
+      <form onSubmit={handleSubmit}>
+        <div className="checkout-street">
+          <label>Street</label>
           <input
             type="text"
-            value={address.street}
-            onChange={(e) => handleInputChange(e, "street", setAddress)}
+            name="street"
+            value={formData.street}
+            onChange={handleInputChange}
             required
           />
         </div>
-        <div>
-          <label>City:</label>
+        <div className="checkout-city">
+          <label>City</label>
           <input
             type="text"
-            value={address.city}
-            onChange={(e) => handleInputChange(e, "city", setAddress)}
+            name="city"
+            value={formData.city}
+            onChange={handleInputChange}
             required
           />
         </div>
-        <div>
-          <label>Province:</label>
+        <div className="checkout-province">
+          <label>Province</label>
           <input
             type="text"
-            value={address.province}
-            onChange={(e) => handleInputChange(e, "province", setAddress)}
+            name="province"
+            value={formData.province}
+            onChange={handleInputChange}
             required
           />
         </div>
-        <div>
-          <label>Country:</label>
+        <div className="checkout-country">
+          <label>Country</label>
           <input
             type="text"
-            value={address.country}
-            onChange={(e) => handleInputChange(e, "country", setAddress)}
+            name="country"
+            value={formData.country}
+            onChange={handleInputChange}
             required
           />
         </div>
-        <div>
-          <label>Postal Code:</label>
+        <div className="checkout-postal">
+          <label>Postal Code</label>
           <input
             type="text"
-            value={address.postal_code}
-            onChange={(e) => handleInputChange(e, "postal_code", setAddress)}
+            name="postal_code"
+            value={formData.postal_code}
+            onChange={handleInputChange}
             required
           />
         </div>
-
-        <div>
-          <label>Credit Card Number:</label>
-          <input
-            type="tel"
-            value={creditCard.number}
-            onChange={(e) => handleInputChange(e, "number", setCreditCard)}
-            required
-          />
-        </div>
-        <div>
-          <label>Expiration Date:</label>
+        <div className="checkout-cardNumber">
+          <label>Credit Card</label>
           <input
             type="text"
-            value={creditCard.expire}
-            onChange={(e) => handleInputChange(e, "expire", setCreditCard)}
+            name="credit_card"
+            value={formData.credit_card}
+            onChange={handleInputChange}
             required
           />
         </div>
-        <div>
-          <label>CVV:</label>
+        <div className="checkout-cardExpiry">
+          <label>Expiry Date</label>
           <input
-            type="tel"
-            value={creditCard.cvv}
-            onChange={(e) => handleInputChange(e, "cvv", setCreditCard)}
+            type="text"
+            name="credit_expire"
+            placeholder="MM/YY"
+            value={formData.credit_expire}
+            onChange={handleInputChange}
             required
           />
         </div>
-
-        <button type="submit">Confirm</button>
+        <div className="checkout-crdCVV">
+          <label>CVV</label>
+          <input
+            type="text"
+            name="credit_cvv"
+            value={formData.credit_cvv}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <button type="submit">Complete Purchase</button>
       </form>
     </div>
   );
-}
+};
 
 export default Checkout;
+
+

@@ -1,16 +1,11 @@
+import React from "react";
 import { useForm } from "react-hook-form";
-import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 
 const Login = () => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
-  const location = useLocation();
-  const setIsLoggedIn = useOutletContext(); // Access setIsLoggedIn function
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const setIsLoggedIn = useOutletContext();
 
   const onSubmit = async (data) => {
     try {
@@ -19,65 +14,59 @@ const Login = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setIsLoggedIn(true); // Set isLoggedIn to true on successful login
-        localStorage.setItem("isLoggedIn", "true");
-
-        const redirectPath = location.state?.from?.pathname || "/home";
-        navigate(redirectPath);
-      } else {
-        alert(result.message || "Login failed. Please try again.");
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Login failed.");
       }
+
+      setIsLoggedIn(true);
+      alert("Login successful! Redirecting to the home page.");
+      navigate("/");
     } catch (error) {
-      console.error("Error during login:", error);
-      alert("An error occurred during login. Please try again.");
+      alert(error.message);
     }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
+    <div className="Login-form">
+      <h1>Login</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Email Input */}
-        <div>
-          <label>Email:</label>
+        <div className="login-email">
+          <label>Email</label>
           <input
             type="email"
-            {...register("email", { required: "Email is required" })}
-            placeholder="Enter your email"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+                message: "Invalid email address",
+              },
+            })}
           />
           {errors.email && <p>{errors.email.message}</p>}
         </div>
-
-        {/* Password Input */}
-        <div>
-          <label>Password:</label>
+        <div className="login-password">
+          <label>Password</label>
           <input
             type="password"
             {...register("password", { required: "Password is required" })}
-            placeholder="Enter your password"
           />
           {errors.password && <p>{errors.password.message}</p>}
         </div>
-
-        {/* Submit Button */}
-        <div>
-          <button type="submit">Log In</button>
-        </div>
+        <button type="submit">Login</button>
       </form>
-
-      <div>
-        <p>
-          Don't have an account? <a href="/signup">Sign up.</a>
-        </p>
-      </div>
+      <p>
+        Don't have an account? <Link to="/signup">Sign up here</Link>.
+      </p>
     </div>
   );
 };
 
 export default Login;
+
+
+

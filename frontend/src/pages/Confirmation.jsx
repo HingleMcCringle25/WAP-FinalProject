@@ -1,23 +1,18 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
-function Confirmation() {
+const Confirmation = () => {
   const navigate = useNavigate();
 
-  const handleContinueShopping = () => {
-    // Navigate to the home page
-    navigate("/home");
-  };
-
   return (
-    <div>
-      <h2>Thank you for your purchase!</h2>
-      <p>
-        Your purchase was successful. We hope you enjoy your new cards. Happy
-        Collecting!
-      </p>
-      <button onClick={handleContinueShopping}>Continue Shopping</button>
+    <div className="confirmation">
+      <h1>Thank You for Your Purchase!</h1>
+      <p>Your order has been placed successfully.</p>
+      <button onClick={() => navigate("/")}>Continue Shopping</button>
     </div>
   );
-}
+};
 
 export default Confirmation;
+
+
