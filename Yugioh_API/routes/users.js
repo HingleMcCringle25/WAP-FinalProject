@@ -147,16 +147,33 @@ router.post("/login", async (req, res) => {
     //if login successful, return email address
     res.status(200).json({ message: "Login successful", email: user.email });
   } catch (error) {
+    console.error("error during login:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 });
 
 //logout route
 router.post("/logout", (req, res) => {
+  console.log("Current session before destruction:", req.session);
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ message: "Failed to log out." });
     }
+
+    // Clear the session cookie
+    res.clearCookie("connect.sid", {
+      httpOnly: true,
+      secure: false, // Set to true if using HTTPS
+      sameSite: "lax",
+    });
+
+    res.clearCookie("cart", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    console.log("Session destroyed for user:", req.session);
     res.status(200).json({ message: "Logged out successfully." });
   });
 });

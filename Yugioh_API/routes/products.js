@@ -41,6 +41,47 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Delete product by ID
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  // Ensure product ID is an integer
+  if (isNaN(id)) {
+    return res.status(400).json({ message: "Product ID must be an integer." });
+  }
+
+  try {
+    // Check if the product exists
+    const existingProduct = await prisma.product.findUnique({
+      where: { product_id: parseInt(id) },
+    });
+
+    if (!existingProduct) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    // Delete the product
+    await prisma.product.delete({
+      where: { product_id: parseInt(id) },
+    });
+
+    console.log(`Product with ID ${id} deleted successfully.`);
+    res.status(200).json({ message: "Product deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+
+    // Handle Prisma-specific errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return res
+        .status(500)
+        .json({ message: `Prisma Error: ${error.message}` });
+    }
+
+    res.status(500).json({ message: "Error deleting product." });
+  }
+});
+
+
 //function to convert MM/YY to a valid date
 const convertCreditExpireToDate = (credit_expire) => {
   const [month, year] = credit_expire.split("/");
@@ -68,19 +109,18 @@ router.post("/purchase", async (req, res) => {
     cart,
   } = req.body;
 
-  //check if user is logged in
+  // Check if user is logged in
+  console.log("Session during purchase:", req.session);
   if (!req.session.customer_id) {
     return res.status(401).json({ message: "User not authenticated." });
   }
 
-  console.log("Session during purchase:", req.session);
-
-  //validate cart is provided and has items
+  // Validate cart is provided and has items
   if (!cart || cart.length === 0) {
     return res.status(400).json({ message: "Cart is empty." });
   }
 
-  //validate required fields
+  // Validate required fields
   if (
     !street ||
     !city ||
@@ -95,10 +135,10 @@ router.post("/purchase", async (req, res) => {
   }
 
   try {
-    //convert credit_expire to a valid date object
+    // Convert credit_expire to a valid date object
     const creditExpireDate = convertCreditExpireToDate(credit_expire);
 
-    //create the purchase entry
+    // Create the purchase entry
     const purchase = await prisma.purchase.create({
       data: {
         customer_id: req.session.customer_id,
@@ -114,27 +154,32 @@ router.post("/purchase", async (req, res) => {
       },
     });
 
-    //parse cart to get product IDs and quantities
+    // Parse cart to get product IDs and quantities
     const productIds = cart.split(",").map((id) => parseInt(id.trim()));
 
-    //group products by product_id, count quantities
+    // Group products by product_id, count quantities
     const productQuantities = productIds.reduce((acc, productId) => {
       acc[productId] = (acc[productId] || 0) + 1;
       return acc;
     }, {});
 
-    //generate the PurchaseItem data with quantities for each product
+    // Generate the PurchaseItem data with quantities for each product
     const purchaseItemsData = Object.keys(productQuantities).map(
       (productId) => ({
-        purchase_id: purchase.purchase_id, //link each item to the purchase
+        purchase_id: purchase.purchase_id, // Link each item to the purchase
         product_id: parseInt(productId),
-        quantity: productQuantities[productId], //the correct quantity for each product
+        quantity: productQuantities[productId], // The correct quantity for each product
       })
     );
 
-    //create purchase items
+    // Create purchase items
     await prisma.purchaseItem.createMany({
       data: purchaseItemsData,
+    });
+
+    console.log("Purchase and purchase items created successfully:", {
+      purchase,
+      purchaseItemsData,
     });
 
     res.status(201).json({
@@ -143,8 +188,15 @@ router.post("/purchase", async (req, res) => {
     });
   } catch (error) {
     console.error("Error completing purchase:", error);
+
+    // Handle Prisma-specific errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return res.status(500).json({ message: `Prisma Error: ${error.message}` });
+    }
+
     res.status(500).json({ message: "Error completing purchase." });
   }
 });
 
 export default router;
+

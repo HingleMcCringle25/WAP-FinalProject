@@ -11,23 +11,25 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static("public"));
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(
   session({
     secret: "secret-key",
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: true, //set to false, HTTPS would have this set to true
+      secure: false, //set to false, HTTPS would have this set to true
       maxAge: 3600000,
-      sameSite: "None",
+      httpOnly: true,
+      sameSite: "lax",
     },
-  })
-);
-
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
   })
 );
 
